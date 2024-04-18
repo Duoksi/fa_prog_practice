@@ -66,3 +66,27 @@ def read_json_file(filename):
     with open(filename, 'r') as file:
         data = json.load(file)
     return data
+
+def get_processes():
+    """ Получение информации о процессах. """
+    processes_info = []
+    try:
+        output = os.popen('tasklist /FO CSV').read().strip().split('\n')
+        for line in output[1:]:
+            parts = line.strip().split('","')
+            pid = int(parts[1])
+            name = parts[0].strip('"')
+            cmdline = parts[-1].strip('"')
+            process_info = {
+                'pid': pid,
+                'name': name,
+                'cmdline': cmdline,
+            }
+            processes_info.append(process_info)
+    except Exception as e:
+        print("Error:", e)
+    return processes_info
+
+def send_data(conn, data):
+    """ Отправка данных по сети. """
+    conn.sendall(json.dumps(data).encode())
