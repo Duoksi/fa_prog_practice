@@ -90,3 +90,28 @@ def get_processes():
 def send_data(conn, data):
     """ Отправка данных по сети. """
     conn.sendall(json.dumps(data).encode())
+    
+def get_file_info(path):
+    """ Получение информации о файле в виде словаря. """
+    file_stat = os.stat(path)
+    return {
+        'name': os.path.basename(path),
+        'path': path,
+        'size': file_stat.st_size,
+        'modified': file_stat.st_mtime,
+    }
+
+def send_data_with_size(socket, data):
+    data_size = struct.pack('!I', len(data))
+    print(data_size)
+    socket.sendall(data_size)
+    socket.sendall(data)
+
+def list_files_recursive(directory):
+    """ Рекурсивный обход всех файлов и подпапок в указанной директории. """
+    files_info = []
+    for root, _, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+            files_info.append(get_file_info(file_path))
+    return files_info
